@@ -12,14 +12,14 @@ del response
 
 
 # settings
-SEQ_LEN = 300  # maximum sequence length we want for training
-BUFFER_SIZE = 5000  # buffer size for shuffling the dataset
-EPOCHS = 254  # number of times we iterate over the full dataset during training
+SEQ_LEN = 200  # maximum sequence length we want for training
+BUFFER_SIZE = 10000  # buffer size for shuffling the dataset
+EPOCHS = 128  # number of times we iterate over the full dataset during training
 RNN = 'GRU'  # whether we use LSTM or GRU RNN units
 UNITS = 1024  # how many units we use
 BATCH_SIZE = 64  # no. sequences of SEQ_LEN we train on before updating weights
-EMBED_DIM = 256  # vector dimension of word vector embeddings
-PRINT = 3000  # how many characters we print during text generation
+EMBED_DIM = 256  # vector dimension of character vector embeddings
+PRINT = 100000  # how many characters we print during text generation
 
 # remove everything before and including "Translated by George Long"
 data = data.split('Translated by George Long')[1]
@@ -85,18 +85,20 @@ def build_model(vocab_size, embed_dim, rnn_units, batch_size):
                                     batch_input_shape=[batch_size, None]),
             tf.keras.layers.GRU(rnn_units, return_sequences=True,
                                 stateful=True,
-                                recurrent_initializer='glorot_uniform'),
+                                recurrent_initializer='glorot_uniform',
+                                dropout=0.1),
             tf.keras.layers.Dense(vocab_size)
-        ])
+        ])  # TODO try dropout=0.1
     elif RNN == 'LSTM':
         model = tf.keras.Sequential([
             tf.keras.layers.Embedding(vocab_size, embed_dim,
                                     batch_input_shape=[batch_size, None]),
             tf.keras.layers.LSTM(rnn_units, return_sequences=True,
                                  stateful=True,
-                                 recurrent_initializer='glorot_uniform'),
+                                 recurrent_initializer='glorot_uniform',
+                                 dropout=0.1),
             tf.keras.layers.Dense(vocab_size)
-        ])
+        ])  # TODO try dropout=0.1
     return model
 
 
@@ -149,7 +151,7 @@ def generate_text(model, start_string, length=3000, temp=1.0):
     input_eval = tf.expand_dims(input_eval, 0)
 
     # initialise empty string to store results
-    text = []
+    meditation = ""
 
     # batch size is 1
     model.reset_states()
@@ -167,9 +169,9 @@ def generate_text(model, start_string, length=3000, temp=1.0):
         input_eval = tf.expand_dims([predicted_id], 0)
 
         # append predicted text
-        text.append(idx2char[predicted_id])
+        meditation += idx2char[predicted_id]
 
-    return (start_string + ''.join(text))
+    return (start_string + meditation)
 
 
 # print our generated meditation
