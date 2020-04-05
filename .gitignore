@@ -1,3 +1,5 @@
 .idea/
 assets/
 code/training_checkpoints/
+code/__pycache__/
+code/.ipynb_checkpoints/
