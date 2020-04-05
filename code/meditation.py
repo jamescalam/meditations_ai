@@ -15,7 +15,7 @@ del response
 SEQ_LEN = 200  # maximum sequence length we want for training
 BUFFER_SIZE = 10000  # buffer size for shuffling the dataset
 EPOCHS = 128  # number of times we iterate over the full dataset during training
-RNN = 'GRU'  # whether we use LSTM or GRU RNN units
+RNN = 'LSTM'  # whether we use LSTM or GRU RNN units
 UNITS = 1024  # how many units we use
 BATCH_SIZE = 64  # no. sequences of SEQ_LEN we train on before updating weights
 EMBED_DIM = 256  # vector dimension of character vector embeddings
@@ -85,7 +85,6 @@ def build_model(vocab_size, embed_dim, rnn_units, batch_size):
                                     batch_input_shape=[batch_size, None]),
             tf.keras.layers.GRU(rnn_units, return_sequences=True,
                                 stateful=True,
-                                recurrent_initializer='glorot_uniform',
                                 dropout=0.1),
             tf.keras.layers.Dense(vocab_size)
         ])  # TODO try dropout=0.1
@@ -95,7 +94,6 @@ def build_model(vocab_size, embed_dim, rnn_units, batch_size):
                                     batch_input_shape=[batch_size, None]),
             tf.keras.layers.LSTM(rnn_units, return_sequences=True,
                                  stateful=True,
-                                 recurrent_initializer='glorot_uniform',
                                  dropout=0.1),
             tf.keras.layers.Dense(vocab_size)
         ])  # TODO try dropout=0.1
