@@ -23,7 +23,7 @@ RNN = 'LSTM'  # whether we use LSTM or GRU RNN units
 UNITS = 1024  # how many units we use
 BATCH_SIZE = 64  # no. sequences of SEQ_LEN we train on before updating weights
 EMBED_DIM = 256  # vector dimension of character vector embeddings
-PRINT = 100000  # how many characters we print during text generation
+PRINT = 10000  # how many characters we print during text generation
 
 # remove everything before and including "Translated by George Long"
 data = data.split('Translated by George Long')[1]
@@ -155,7 +155,7 @@ for filename in os.listdir(checkpoint_dir):
         print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 # saving model and char2idx dictionary
-MODEL_NAME = dw.model_name(RNN, EPOCHS, 'meditations')
+MODEL_NAME = dw.model_name(RNN, EPOCHS, SEQ_LEN, 'meditations')
 dw.save_model(model, MODEL_NAME)
 dw.save_char2idx(char2idx, MODEL_NAME)
 
@@ -191,5 +191,13 @@ def generate_text(model, start_string, length=3000, temp=1.0):
     return (start_string + meditation)
 
 
-# print our generated meditation
-print(generate_text(model, start_string=u'From ', length=PRINT))
+# output our generated meditation
+text = generate_text(model, start_string=u'From ', length=PRINT)
+summary = f"""SEQ_LEN = {SEQ_LEN}
+BUFFER_SIZE = {BUFFER_SIZE}
+EPOCHS = {EPOCHS}
+RNN = {RNN}
+UNITS = {UNITS}
+BATCH_SIZE = {BATCH_SIZE}
+EMBED_DIM = {EMBED_DIM}"""
+dw.save_text(text, MODEL_NAME, summary)
