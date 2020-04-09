@@ -154,7 +154,10 @@ for filename in os.listdir(checkpoint_dir):
     except Exception as e:
         print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-dw.save_model(model, dw.model_name(RNN, EPOCHS, 'meditations'))
+# saving model and char2idx dictionary
+MODEL_NAME = dw.model_name(RNN, EPOCHS, 'meditations')
+dw.save_model(model, MODEL_NAME)
+dw.save_char2idx(char2idx, MODEL_NAME)
 
 # defining text generation function
 def generate_text(model, start_string, length=3000, temp=1.0):

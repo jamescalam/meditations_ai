@@ -13,11 +13,11 @@ def save_char2idx(char2idx, modelname):
     if not os.path.isdir(f'../models/{modelname}'):
         os.makedirs(f'../models/{modelname}')
     # save the char2idx dictionary
-    with open(f"../models/{modelname}/char2idx.json") as f:
-        pickle.dump(char2idx, modelname, pickle.HIGHEST_PROTOCOL)
+    with open(f"../models/{modelname}/char2idx.json", 'wb') as f:
+        pickle.dump(char2idx, f, pickle.HIGHEST_PROTOCOL)
 
 def load_char2idx(modelname):
-    with open(f"../models/{modelname}/char2idx.json") as f:
+    with open(f"../models/{modelname}/char2idx.json", 'rb') as f:
         return pickle.load(f)
 
 # save and load models
