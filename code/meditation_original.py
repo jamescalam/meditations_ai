@@ -3,6 +3,10 @@ import re
 import numpy as np
 import tensorflow as tf
 import os
+import shutil
+import sys
+sys.path.insert(0, './')
+import data_writer as dw
 
 
 # import Meditations by Marcus Aurelius
@@ -12,9 +16,9 @@ del response
 
 
 # settings
-SEQ_LEN = 200  # maximum sequence length we want for training
+SEQ_LEN = 100  # maximum sequence length we want for training
 BUFFER_SIZE = 10000  # buffer size for shuffling the dataset
-EPOCHS = 128  # number of times we iterate over the full dataset during training
+EPOCHS = 8  # number of times we iterate over the full dataset during training
 RNN = 'LSTM'  # whether we use LSTM or GRU RNN units
 UNITS = 1024  # how many units we use
 BATCH_SIZE = 64  # no. sequences of SEQ_LEN we train on before updating weights
@@ -139,6 +143,18 @@ model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
 model.build(tf.TensorShape([1, None]))
 model.summary()
 
+# empty the checkpoint directory
+for filename in os.listdir(checkpoint_dir):
+    file_path = os.path.join(checkpoint_dir, filename)
+    try:
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+    except Exception as e:
+        print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+dw.save_model(model, dw.model_name(RNN, EPOCHS, 'meditations'))
 
 # defining text generation function
 def generate_text(model, start_string, length=3000, temp=1.0):
