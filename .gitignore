@@ -1,6 +1,8 @@
 .idea/
 assets/
-models/
+models/tmp/
+models/**/*.json
+models/**/*.h5
 code/training_checkpoints/
 code/__pycache__/
 code/.ipynb_checkpoints/
