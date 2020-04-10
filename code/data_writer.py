@@ -1,6 +1,7 @@
 import tensorflow as tf
 import pickle
 import os
+import re
 from datetime import datetime
 
 # setup model naming
@@ -70,3 +71,24 @@ def save_text(text, modelname, summary):
     # now save to file
     with open(f"../models/{modelname}/meditation.html", "w") as f:
         f.write(html)
+
+
+# create vocabulary for use in 'real' word checks
+def create_vocab(text):
+    # if data directory does not exist make it
+    if not os.path.isdir(f'../data'):
+        os.makedirs(f'../data')
+    # format text to get list of words
+    text = re.sub("[^\w\s]", "", text).lower()  # remove anything that is not word or space, and lowercase
+    text = [word.strip() for word in text.split(" ")]  # convert into a list and strip leading/trailing whitespace
+    text = set(text)
+    # now save new vocab set to file
+    with open('../data/vocab.txt', 'w', encoding="utf-8") as f:
+        for word in text:
+            f.write("%s\n" % word)
+    print(f"{len(text)} unique words saved to '../data/vocab.txt'")
+
+def read_vocab():
+    # load dictionart.txt
+    with open('../data/vocab.txt', 'r', encoding="utf-8") as f:
+        return set(f.read().split('\n'))

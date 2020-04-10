@@ -57,7 +57,7 @@ def rate(text):
         rating += 20.
     else:
         rating -= 20.
-    print(f"punc checked, score: {rating}")
+
     # checking for too much repetition
     repetition_score = 20.  # initialise score
     count = Counter([word.strip() for word in norm.split(" ")])  # get count dictionary
@@ -65,14 +65,15 @@ def rate(text):
     count = sorted(count, key=lambda x: x[1])  # sorting tuple list
     # now calculate the repetition score
     for x in count:
-        if x[1] == 1:
-            repetition_score *= 0.5  # if just one word, reduce the repetition_score
-        else:
-            repetition_score *= x[1]  # else, the repetition acts as a multiplier
-        print(repetition_score)
+        repetition_score *= x[1] * .5  # else, the repetition acts as a multiplier
     # now we subtract the repetition score from our rating
     rating -= repetition_score
-    print(f"repetition checked, score: {rating}")
+
+    # checking all words are actual words
+    vocab = re.compile(r"\b" + r"\b|\b".join(dw.read_vocab()) + r"\b")
+    not_real = re.sub(vocab, "", norm)  # remove real words
+    rating -= (len(not_real.split())/len(norm.split())) * 100.  # % * 100 of non-real words to real words
+    # !!! normalise the score to length of text?
     return rating
 
 
@@ -102,6 +103,12 @@ txt_meditations = d.meditations()
 # Epistulae Morales ad Lucilium by Seneca
 txt_letters = d.hello_lucilius()
 
+# convert letters into string
+txt_letters = "\n".join([txt_letters[key][1] for key in txt_letters])
 # join together
 txt = "\n".join([txt_meditations, txt_letters])
+
+# save and load vocab
+dw.create_vocab(txt)
+vocab = dw.read_vocab()
 """
