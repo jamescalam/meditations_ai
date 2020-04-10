@@ -15,7 +15,7 @@ import data_writer as dw
 
 
 # text generation function
-def generate(model, char2idx, start):
+def generate(model, char2idx, start, counter=1):
     # create idx2char dictionary
     idx2char = {char2idx[key]: key for key in char2idx}
     # converting start string to numbers (vectorisation)
@@ -27,7 +27,7 @@ def generate(model, char2idx, start):
 
     # batch size is 1
     model.reset_states()
-    for i in range(length):
+    while counter > 0:
         predictions = model(input_eval)
         # remove batch dimension
         predictions = tf.squeeze(predictions, 0)
@@ -41,7 +41,10 @@ def generate(model, char2idx, start):
 
         # append predicted text
         meditation += idx2char[predicted_id]
-
+        # check if we got a newline
+        if meditation[-2:] == r'\n':
+            # this is a meditation, so reduce counter by 1
+            counter -= 1
     return (start + meditation)
 
 
