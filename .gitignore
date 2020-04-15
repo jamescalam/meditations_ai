@@ -6,3 +6,5 @@ models/**/*.h5
 code/training_checkpoints/
 code/__pycache__/
 code/.ipynb_checkpoints/
+data/email.txt
+data/password.txt

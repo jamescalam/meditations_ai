@@ -2,6 +2,10 @@ import tensorflow as tf
 import pickle
 import os
 import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
 # setup model naming
@@ -31,7 +35,7 @@ def save_model(model, modelname):
     #model.save(f'../models/{modelname}/model')
     model.save(f'../models/{modelname}/model.h5')
 
-def load(modelname):
+def load_model(modelname):
     # load the model
     # !!! use this code when TF 2.2 is released
     #return tf.keras.models.load_model(f"../models/{model}/model")
@@ -92,3 +96,28 @@ def read_vocab():
     # load dictionart.txt
     with open('../data/vocab.txt', 'r', encoding="utf-8") as f:
         return set(f.read().split('\n'))
+
+def notify_me(text="Automatic notification.", img=None):
+    # build message contents
+    msg = MIMEMultipart()
+    msg['Subject'] = 'Meditations.ai'
+    msg.attach(MIMEText(text))  # text contents
+    if img is not None:
+        img_data = open(img, 'rb').read()
+        msg.attach(MIMEImage(img_data, name=os.path.basename(img)))
+
+    # send notification to email address via outlook
+    smtp = smtplib.SMTP('smtp-mail.outlook.com', 587)
+    smtp.ehlo()
+    smtp.starttls()
+    # read email and password from file
+    with open('../Data/email.txt', 'r') as fp:
+        email = fp.read()
+    with open('../Data/password.txt', 'r') as fp:
+        pwd = fp.read()
+    # login to outlook server
+    smtp.login(email, pwd)
+    # send notification to self
+    smtp.sendmail(email, email, msg.as_string())
+    # disconnect from the server
+    smtp.quit()

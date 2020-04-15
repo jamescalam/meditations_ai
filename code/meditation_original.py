@@ -1,5 +1,3 @@
-import requests
-import re
 import numpy as np
 import tensorflow as tf
 import os
@@ -7,62 +5,40 @@ import shutil
 import sys
 sys.path.insert(0, './')
 import data_writer as dw
-
-
-# import Meditations by Marcus Aurelius
-response = requests.get('http://classics.mit.edu/Antoninus/meditations.mb.txt')
-data = response.text
-del response
-
+import data as d
 
 # settings
 SEQ_LEN = 100  # maximum sequence length we want for training
 BUFFER_SIZE = 10000  # buffer size for shuffling the dataset
-EPOCHS = 8  # number of times we iterate over the full dataset during training
+EPOCHS = 32  # number of times we iterate over the full dataset during training
 RNN = 'LSTM'  # whether we use LSTM or GRU RNN units
 UNITS = 1024  # how many units we use
 BATCH_SIZE = 64  # no. sequences of SEQ_LEN we train on before updating weights
 EMBED_DIM = 256  # vector dimension of character vector embeddings
 PRINT = 10000  # how many characters we print during text generation
 
-# remove everything before and including "Translated by George Long"
-data = data.split('Translated by George Long')[1]
+# import data
+txt_meditations = d.meditations()
+txt_letters = d.hello_lucilius()
 
-# remove "----" lines, as "-" is not a useful character we will remove it completely
-data = data.replace('-', '')
+# format letters into text from {letter: [address, text]}
+txt_letters = "\n".join([txt_letters[key][1] for key in txt_letters])
 
-# remove "BOOK ..." lines, for this we use regular expressions
-data = re.sub('BOOK [A-Z]+\n', '', data)
+# join data
+data = "\n".join([txt_meditations, txt_letters])
 
-# remove "THE END" and all that follows it
-data = data.split("THE END")[0]
+# create vocab
+vocab = sorted(set(data))
 
-vocab_char = sorted(set(data))  # character level vocab
-print(f'{len(vocab_char)} unique characters found')
-
-# splitting by newline characters
-data = data.split('\n\n')
-
-# remove empty samples
-empty = lambda x: x.replace('\s+', '') != ''
-data = list(filter(empty, data))
-
-# remove final '\n' characters
-data = list(map(lambda x: x.replace('\n', ' '), data))
-
-print(f"We have {len(data)} stoic lessons from Marcus Aurelius")
-
-# now join back together in full text
-data = '\n'.join(map(lambda x: x.strip(), data))  # we also use map to strip each paragraph
-
-char2idx = {u:i for i, u in enumerate(vocab_char)}
-idx2char = np.array(vocab_char)
+char2idx = {u:i for i, u in enumerate(vocab)}
+idx2char = np.array(vocab)
 
 data_idx = np.array([char2idx[c] for c in data])
 
 # max length sentence we want
 seq_length = SEQ_LEN
 examples_per_epoch = len(data) // (seq_length+1)
+
 
 # create training data
 char_dataset = tf.data.Dataset.from_tensor_slices(data_idx)
@@ -72,8 +48,9 @@ sequences = char_dataset.batch(seq_length+1, drop_remainder=True)
 
 # for each sequence, we duplicate and shift it to form the input and target text
 def split_input_output(chunk):
-    input_data = chunk[:-1]
-    target_data = chunk[1:]
+    # "hello"
+    input_data = chunk[:-1]  # "hell"
+    target_data = chunk[1:]  # "ello"
     return input_data, target_data
 
 dataset = sequences.map(split_input_output)
@@ -106,7 +83,7 @@ def build_model(vocab_size, embed_dim, rnn_units, batch_size):
 
 # build model
 model = build_model(
-    vocab_size=len(vocab_char),
+    vocab_size=len(vocab),
     embed_dim=EMBED_DIM,
     rnn_units=UNITS,
     batch_size=BATCH_SIZE)
@@ -138,7 +115,7 @@ history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
 tf.train.latest_checkpoint(checkpoint_dir)
 
 # rebuild model but with batch size of 1
-model = build_model(len(vocab_char), EMBED_DIM, UNITS, 1)
+model = build_model(len(vocab), EMBED_DIM, UNITS, 1)
 model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
 model.build(tf.TensorShape([1, None]))
 model.summary()

@@ -53,7 +53,7 @@ def meditations():
 
 def hello_lucilius(jupyter=False):
     """
-    Imports 'Ad Lucilium Epistulae Morales' by Seneca
+    Imports 'Epistulae Morales Ad Lucilium' by Seneca
     :return:
     """
 
