@@ -26,13 +26,19 @@ def visualise(df):
     if not os.path.isdir(dir):
         os.makedirs(dir)
     sns.set(style="darkgrid")  # setting style
+    sns.set_palette(['#212B38', '#08C6AB',
+     '#726EFF', '#37465B',
+     '#5AFFE7'])  # setting palette colours
+    plt.figure(figsize=(14, 6))
     # df should be dataframe with 'model', 'score', 'iteration' columns
-    sns.lineplot(data=df,
-                 x='iteration', y='score',
-                 hue='model',
-                 palette=['#212B38', '#08C6AB',
-                          '#726EFF', '#37465B',
-                          '#5AFFE7'])
+    print(len(df))
+    sns.lineplot(
+        data=df,
+        x='iteration', y='score',
+        hue='model',
+        linewidth=3.
+    )
+    plt.tight_layout()
     plt.savefig(f"{dir}/gladiator.jpg")
 
 # text generation function
@@ -109,7 +115,16 @@ def rate(text):
     # get normalised text (no punc, all lowercase)
     norm = re.sub(r'[^\w\s]', '', text).lower()
 
-    # checking for correct punctuation - may include newline too, eg '.' and '.\n' are both good
+    # plenty of punctuation is often a good thing
+    rating += ((len(re.sub(r'[\w\s]', '', text))+1)/len(text)) * 20
+
+    # check that we have an equal number of speech marks
+    if len(re.sub(r'[^"]', '', text)) % 2 == 0:
+        rating += 5
+    else:
+        rating -= 5
+
+    # checking for correct ending punctuation - may include newline too, eg '.' and '.\n' are both good
     if text[-1:] in ['.', '!', '?'] or text[-2:-1] in ['.', '!', '?']:
         rating += 20.
     else:
@@ -130,7 +145,7 @@ def rate(text):
     vocab = re.compile(r"\b" + r"\b|\b".join(dw.read_vocab()) + r"\b")
     not_real = re.sub(vocab, "", norm)  # remove real word
     rating -= len(not_real.split()) * 10  # not real words
-    #rating -= ((len(not_real.split())+1)/(len(norm.split())+1)) * 100.  # % * 100 of non-real words to real words
+    rating += ((len(norm.split())+1)/(len(not_real.split())+1)) * 10.  # % * 20 of real words to non-real words
     # !!! normalise the score to length of text?
     return round(rating, 2)
 
