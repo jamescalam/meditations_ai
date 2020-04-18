@@ -21,9 +21,19 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 # ensemble function visualisation
 def visualise(df):
+    dir = f"../models/ensemble_rnn_{datetime.now().strftime('%m%d')}"
+    # if directory does not exist make it
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    sns.set(style="darkgrid")  # setting style
     # df should be dataframe with 'model', 'score', 'iteration' columns
-    sns.lineplot(data=df, x='iteration', y='score', hue='model')
-    plt.savefig(f"../models/ensemble_rnn_{datetime.now().strftime('%m%d')}/gladiator.jpg")
+    sns.lineplot(data=df,
+                 x='iteration', y='score',
+                 hue='model',
+                 palette=['#212B38', '#08C6AB',
+                          '#726EFF', '#37465B',
+                          '#5AFFE7'])
+    plt.savefig(f"{dir}/gladiator.jpg")
 
 # text generation function
 def generate(model, char2idx, start, counter=1, maxlen=1000, end='\n', keep_start=True):
@@ -120,7 +130,6 @@ def rate(text):
     vocab = re.compile(r"\b" + r"\b|\b".join(dw.read_vocab()) + r"\b")
     not_real = re.sub(vocab, "", norm)  # remove real word
     rating -= len(not_real.split()) * 10  # not real words
-    rating += (len(norm.split()) - len(not_real.split()))  # real words
     #rating -= ((len(not_real.split())+1)/(len(norm.split())+1)) * 100.  # % * 100 of non-real words to real words
     # !!! normalise the score to length of text?
     return round(rating, 2)
