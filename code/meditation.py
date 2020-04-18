@@ -118,8 +118,10 @@ def rate(text):
 
     # checking all words are actual words
     vocab = re.compile(r"\b" + r"\b|\b".join(dw.read_vocab()) + r"\b")
-    not_real = re.sub(vocab, "", norm)  # remove real words
-    rating -= ((len(not_real.split())+1)/(len(norm.split())+1)) * 100.  # % * 100 of non-real words to real words
+    not_real = re.sub(vocab, "", norm)  # remove real word
+    rating -= len(not_real.split()) * 10  # not real words
+    rating += (len(norm.split()) - len(not_real.split()))  # real words
+    #rating -= ((len(not_real.split())+1)/(len(norm.split())+1)) * 100.  # % * 100 of non-real words to real words
     # !!! normalise the score to length of text?
     return round(rating, 2)
 
@@ -149,15 +151,15 @@ class ensemble:
         for i in range(sequences):
             # loop through each model and make prediction
             for modelname in model_list:
-                text = generate(models[modelname]['model'],
+                pred = generate(models[modelname]['model'],
                                 models[modelname]['char2idx'],
                                 start=start, end=end,
                                 keep_start=keep_start)
                 # get score
-                score = rate(text)
+                score = rate(pred)
                 # add score and generated text to the meditations dictionary entry for that model
-                meditations[modelname] = [score, text]
-                print(f"[{score}] ({modelname}): {text[:70]}...")
+                meditations[modelname] = [score, pred]
+                print(f"[{score}] ({modelname}): {pred[:70]}...")
 
             # find highest scoring sentence
             # convert to list and sort (high -> low)
@@ -171,10 +173,10 @@ class ensemble:
 
             # if we want to visualise, and performance metrics to performance list
             if vis:
-                for model in self.meditations:
+                for modelname in meditations:
                     new_row = pd.DataFrame({
-                        'model': [model],
-                        'score': [self.meditations[model][0]],
+                        'model': [modelname],
+                        'score': [meditations[modelname][0]],
                         'iteration': [i]
                     })
                     performance = pd.concat([performance, new_row], ignore_index=True)

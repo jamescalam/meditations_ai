@@ -5,6 +5,7 @@ import re
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
@@ -97,7 +98,7 @@ def read_vocab():
     with open('../data/vocab.txt', 'r', encoding="utf-8") as f:
         return set(f.read().split('\n'))
 
-def notify_me(text="Automatic notification.", img=None):
+def notify_me(text="Automatic notification.", img=None, attachment=None):
     # build message contents
     msg = MIMEMultipart()
     msg['Subject'] = 'Meditations.ai'
@@ -105,6 +106,14 @@ def notify_me(text="Automatic notification.", img=None):
     if img is not None:
         img_data = open(img, 'rb').read()
         msg.attach(MIMEImage(img_data, name=os.path.basename(img)))
+    if attachment is not None:
+        with open(attachment, 'rb') as f:
+            file = MIMEApplication(
+                f.read(),
+                name=os.path.basename(attachment)
+            )
+        file['Content-Disposition'] = f'attachment; filename="{os.path.basename(attachment)}"'
+        msg.attach(file)
 
     # send notification to email address via outlook
     smtp = smtplib.SMTP('smtp-mail.outlook.com', 587)

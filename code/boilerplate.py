@@ -14,21 +14,8 @@ NEW = False
 MODEL_PARAMS = []
 MODEL_PARAMS.append({
     'SEQLEN': 250, 'BUFFER': 10000, 'BATCHSIZE': 64, 'EMBED_DIM': 256,
-    'EPOCHS': 2, 'RNN': 'LSTM', 'RNN_UNITS': 1024, 'NAME': ''
-})
-MODEL_PARAMS.append({
-    'SEQLEN': 250, 'BUFFER': 10000, 'BATCHSIZE': 64, 'EMBED_DIM': 256,
-    'EPOCHS': 64, 'RNN': 'LSTM', 'RNN_UNITS': 2048, 'NAME': ''
-})
-"""
-MODEL_PARAMS.append({
-    'SEQLEN': 250, 'BUFFER': 10000, 'BATCHSIZE': 64, 'EMBED_DIM': 256,
     'EPOCHS': 512, 'RNN': 'LSTM', 'RNN_UNITS': 1024, 'NAME': ''
 })
-MODEL_PARAMS.append({
-    'SEQLEN': 250, 'BUFFER': 10000, 'BATCHSIZE': 64, 'EMBED_DIM': 256,
-    'EPOCHS': 512, 'RNN': 'LSTM', 'RNN_UNITS': 2048, 'NAME': ''
-})"""
 
 
 if NEW:
@@ -63,7 +50,8 @@ if PREDICT:
     MODEL_LIST = [
         'LSTM_e64_sl100_0412',
         'LSTM_e128_sl100_0413',
-        'LSTM_e256_sl100_0414'
+        'LSTM_e256_sl100_0414',
+        'LSTM_e512_sl250_0415'
         #'LSTM_e64_sl250_0415'
     ]
 
@@ -74,9 +62,9 @@ if PREDICT:
     dw.save_text(text, f"ensemble_rnn_{datetime.now().strftime('%m%d')}", "Summary exempt.")
 
     dw.notify_me(f"Ensemble model text generation complete, {len(text)} characters generated.\n"+
-                 f"Text saved to local ensemble_rnn_{datetime.now().strftime('%m%d')} directory.\n\n"+
-                 text,
-                 img=f"../models/ensemble_rnn_{datetime.now().strftime('%m%d')}/gladiator.jpg")
+                 f"Text saved to local ensemble_rnn_{datetime.now().strftime('%m%d')} directory.\n\n",
+                 img=f"../models/ensemble_rnn_{datetime.now().strftime('%m%d')}/gladiator.jpg",
+                 attachment=f"../models/ensemble_rnn_{datetime.now().strftime('%m%d')}/meditation.html")
 
 """__________BUILDING MEDITATIONS VOCAB__________
 # import texts
