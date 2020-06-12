@@ -51,7 +51,7 @@ class Model:
     def format_data(self, txt):
         self.vocab = sorted(set(txt))  # create vocab from text string (txt)
 
-        self.char2idx = {u: i for i, u in enumerate(self.vocab)}  # create char2idx mappings
+        self.char2idx = {c: i for i, c in enumerate(self.vocab)}  # create char2idx mappings
         # TODO in vide, char2idx -> self.char2idx
 
         data_idx = np.array([self.char2idx[c] for c in txt])  # converting data from characters to indexes

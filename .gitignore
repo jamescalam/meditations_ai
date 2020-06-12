@@ -3,6 +3,7 @@ assets/
 models/tmp/
 models/**/*.json
 models/**/*.h5
+models/**/*.bin
 code/training_checkpoints/
 code/__pycache__/
 code/.ipynb_checkpoints/
